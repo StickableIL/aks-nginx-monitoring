@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nginx-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: nginx.rules
+    rules:
+    - alert: NginxHighCPUUsage
+      expr: rate(container_cpu_usage_seconds_total{container="nginx"}[5m]) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High CPU usage on Nginx pod
+        description: "Nginx pod {{ $labels.pod }} has high CPU usage ({{ $value }}%)"
+    - alert: NginxContainerRestarting
+      expr: changes(container_start_time_seconds{container="nginx"}[15m]) > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Nginx container restarting frequently
+        description: "Nginx container in pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
