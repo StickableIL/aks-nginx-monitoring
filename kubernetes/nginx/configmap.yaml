@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to Azure AKS!</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 40px auto;
+          max-width: 800px;
+          padding: 20px;
+          text-align: center;
+          background-color: #f0f2f5;
+        }
+        h1 {
+          color: #0078d4;
+          font-size: 48px;
+          margin-bottom: 20px;
+        }
+        p {
+          color: #333;
+          font-size: 24px;
+          line-height: 1.6;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Welcome to Azure AKS!</h1>
+      <p>Your Nginx application is running successfully on Azure Kubernetes Service.</p>
+      <p>This page is served through a Kubernetes ConfigMap.</p>
+    </body>
+    </html>
