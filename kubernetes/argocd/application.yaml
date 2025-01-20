@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-username/aks-nginx-monitoring.git  # Replace with your repository
+    repoURL: https://github.com/StickableIL/aks-nginx-monitoring.git
     targetRevision: HEAD
     path: kubernetes/nginx
   destination:
