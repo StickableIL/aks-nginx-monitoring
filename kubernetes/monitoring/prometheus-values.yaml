@@ -1,6 +1,13 @@
 prometheus:
+  thanosService:
+    enabled: false
   service:
     type: LoadBalancer
+    targetPort: 9090
+    nodePort: 30090
+    annotations: {}
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
@@ -14,6 +21,9 @@ alertmanager:
   enabled: true
   service:
     type: LoadBalancer
+    annotations: {}
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
   config:
     global:
       resolve_timeout: 5m
@@ -32,6 +42,9 @@ grafana:
   adminPassword: admin
   service:
     type: LoadBalancer
+    port: 80
+    targetPort: 3000
+    nodePort: 30080
   configMaps:
     - monitoring-grafana
   sidecar:
