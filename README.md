@@ -72,12 +72,13 @@ The deployment will create:
 │   └── outputs.tf
 ├── kubernetes/
 │   ├── nginx/
+│   │   ├── alertrule.yaml
+│   │   ├── configmap.yaml
 │   │   ├── deployment.yaml
 │   │   ├── service.yaml
-│   │   └── configmap.yaml
+│   │   └── servicemonitor.yaml
 │   ├── monitoring/
-│   │   ├── prometheus-values.yaml
-│   │   └── alertmanager-config.yaml
+│   │   └── prometheus-values.yaml
 │   └── argocd/
 │       └── application.yaml
 └── README.md
