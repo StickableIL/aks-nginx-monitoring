@@ -6,44 +6,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 45.7.1
-    chart: kube-prometheus-stack
+    repoURL: https://github.com/skipout/aks-nginx-monitoring.git
+    targetRevision: HEAD
+    path: kubernetes/monitoring
     helm:
-      values: |
-        prometheus:
-          prometheusSpec:
-            serviceMonitorSelectorNilUsesHelmValues: false
-            podMonitorSelectorNilUsesHelmValues: false
-            ruleSelectorNilUsesHelmValues: false
-            additionalScrapeConfigs:
-              - job_name: 'nginx'
-                static_configs:
-                  - targets: ['nginx.default.svc.cluster.local:9113']
-        
-        alertmanager:
-          enabled: true
-          config:
-            global:
-              resolve_timeout: 5m
-            route:
-              group_by: ['alertname', 'job']
-              group_wait: 30s
-              group_interval: 5m
-              repeat_interval: 12h
-              receiver: 'null'
-            receivers:
-              - name: 'null'
-        
-        grafana:
-          enabled: false
-        
-        kubeStateMetrics:
-          enabled: true
-        
-        nodeExporter:
-          enabled: true
-
+      valueFiles:
+        - prometheus-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
