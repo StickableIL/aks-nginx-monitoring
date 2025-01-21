@@ -22,6 +22,20 @@ alertmanager:
     receivers:
       - name: 'null'
 
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  adminPassword: admin
+  service:
+    type: LoadBalancer
+
+prometheusOperator:
+  enabled: true
+  admissionWebhooks:
+    enabled: true
+    patch:
+      enabled: true
+
 kubeStateMetrics:
   enabled: true
 

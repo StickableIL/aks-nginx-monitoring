@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/skipout/aks-nginx-monitoring.git
-    targetRevision: HEAD
-    path: kubernetes/monitoring
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 45.7.1
     helm:
       valueFiles:
         - prometheus-values.yaml
