@@ -12,6 +12,8 @@ spec:
     helm:
       values: |
         prometheus:
+          service:
+            type: LoadBalancer
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
@@ -20,11 +22,11 @@ spec:
               - job_name: 'nginx'
                 static_configs:
                   - targets: ['nginx.default.svc.cluster.local:9113']
-          service:
-            type: LoadBalancer
 
         alertmanager:
           enabled: true
+          service:
+            type: LoadBalancer
           config:
             global:
               resolve_timeout: 5m
