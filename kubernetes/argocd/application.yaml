@@ -10,8 +10,12 @@ spec:
     targetRevision: 45.7.1
     chart: kube-prometheus-stack
     helm:
-      valueFiles:
-        - ../monitoring/prometheus-values.yaml
+      values: |
+        prometheus:
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            ruleSelectorNilUsesHelmValues: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -21,5 +25,5 @@ spec:
       selfHeal: true
     syncOptions:
     - CreateNamespace=true
-    - ServerSideApply=true
+    - ServerSideApply=true  # Add this line
     - Replace=true
