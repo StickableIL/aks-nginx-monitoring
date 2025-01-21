@@ -20,6 +20,8 @@ spec:
               - job_name: 'nginx'
                 static_configs:
                   - targets: ['nginx.default.svc.cluster.local:9113']
+          service:
+            type: LoadBalancer
 
         alertmanager:
           enabled: true

@@ -1,4 +1,6 @@
 prometheus:
+  service:
+    type: LoadBalancer
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
@@ -10,6 +12,8 @@ prometheus:
 
 alertmanager:
   enabled: true
+  service:
+    type: LoadBalancer
   config:
     global:
       resolve_timeout: 5m
