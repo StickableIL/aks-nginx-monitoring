@@ -135,19 +135,58 @@ The deployment will create:
 
 ## Monitoring
 
-### Accessing Prometheus
+### Accessing Monitoring Services
 
-```bash
-kubectl port-forward svc/prometheus-server -n monitoring 9090:9090
-```
-Access Prometheus UI at http://localhost:9090
+Prometheus and Alertmanager are exposed via external IPs:
 
-### Accessing Alertmanager
+- Prometheus: http://172.212.69.91:9090
+- Alertmanager: http://20.242.176.155:9093
 
-```bash
-kubectl port-forward svc/alertmanager -n monitoring 9093:9093
-```
-Access Alertmanager UI at http://localhost:9093
+### Using Prometheus UI
+
+1. Key Pages to Check:
+   - Targets: http://172.212.69.91:9090/targets (shows if nginx metrics scraping is working)
+   - Alerts: http://172.212.69.91:9090/alerts (shows configured alert rules)
+   - Rules: http://172.212.69.91:9090/rules (shows all prometheus rules)
+
+2. Useful Prometheus Queries:
+   ```
+   # Container CPU Usage
+   rate(container_cpu_usage_seconds_total{container="nginx"}[5m]) * 100
+
+   # Container Memory Usage
+   container_memory_usage_bytes{container="nginx"}
+
+   # Container Restart Count
+   kube_pod_container_status_restarts_total{container="nginx"}
+   ```
+
+### Testing Alerts
+
+The following alerts are configured:
+
+1. NginxHighCPUUsage Alert:
+   - Triggers if CPU > 80% for 5 minutes
+   - Query to monitor:
+     ```
+     rate(container_cpu_usage_seconds_total{container="nginx"}[5m]) * 100
+     ```
+
+2. NginxContainerRestarting Alert:
+   - Triggers if > 2 restarts in 15 minutes
+   - Query to monitor:
+     ```
+     changes(container_start_time_seconds{container="nginx"}[15m])
+     ```
+
+### Using Alertmanager UI
+
+Access Alertmanager at http://20.242.176.155:9093 to:
+- View active alerts
+- Check silenced/inhibited alerts
+- Review alert history
+
+Note: The ServiceMonitor is configured to scrape metrics every 15 seconds, so any changes should be reflected in Prometheus with minimal delay.
 
 ## Cleanup
 
