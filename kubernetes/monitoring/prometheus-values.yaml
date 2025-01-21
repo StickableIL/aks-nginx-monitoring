@@ -22,9 +22,6 @@ alertmanager:
     receivers:
       - name: 'null'
 
-grafana:
-  enabled: false
-
 kubeStateMetrics:
   enabled: true
 
