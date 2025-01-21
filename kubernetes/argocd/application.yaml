@@ -1,27 +1,6 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nginx-app
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/StickableIL/aks-nginx-monitoring.git
-    targetRevision: HEAD
-    path: kubernetes/nginx
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
   name: monitoring
   namespace: argocd
 spec:
@@ -34,14 +13,24 @@ spec:
       values: |
         prometheus:
           prometheusSpec:
-            serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
-            ruleSelectorNilUsesHelmValues: false
-            additionalScrapeConfigs:
-              - job_name: 'nginx'
-                static_configs:
-                  - targets: ['nginx.default.svc.cluster.local:9113']
-        
+            serviceMonitorSelectorNilUsesHelmValues: false
+            retention: 5d
+            resources:
+              requests:
+                cpu: 200m
+                memory: 500Mi
+              limits:
+                cpu: 500m
+                memory: 1Gi
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+
         alertmanager:
           enabled: true
           config:
@@ -55,15 +44,20 @@ spec:
               receiver: 'null'
             receivers:
               - name: 'null'
-        
-        grafana:
-          enabled: false
-        
-        kubeStateMetrics:
+
+        prometheusOperator:
           enabled: true
-        
+          prometheusSpec:
+            retention: 5d
+
         nodeExporter:
           enabled: true
+
+        kubeStateMetrics:
+          enabled: true
+
+        grafana:
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
