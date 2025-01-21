@@ -41,6 +41,19 @@ spec:
           adminPassword: admin
           service:
             type: LoadBalancer
+          configMaps:
+            - monitoring-grafana
+          sidecar:
+            dashboards:
+              enabled: true
+              label: grafana_dashboard
+              searchNamespace: ALL
+
+        kubePrometheus:
+          enabled: true
+          configMaps:
+            - monitoring-kube-prometheus-apiserver
+            - monitoring-kube-prometheus-cluster-total
 
         prometheusOperator:
           enabled: true
@@ -79,3 +92,10 @@ spec:
     - CreateNamespace=true
     - ServerSideApply=true
     - Replace=true
+    - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        maxDuration: 3m0s
+        factor: 2

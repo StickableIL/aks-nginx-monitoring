@@ -28,6 +28,19 @@ grafana:
   adminPassword: admin
   service:
     type: LoadBalancer
+  configMaps:
+    - monitoring-grafana
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+
+kubePrometheus:
+  enabled: true
+  configMaps:
+    - monitoring-kube-prometheus-apiserver
+    - monitoring-kube-prometheus-cluster-total
 
 prometheusOperator:
   enabled: true
