@@ -10,8 +10,64 @@ spec:
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 45.7.1
     helm:
-      valueFiles:
-        - kubernetes/monitoring/prometheus-values.yaml  
+      values: |
+        prometheus:
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            ruleSelectorNilUsesHelmValues: false
+            additionalScrapeConfigs:
+              - job_name: 'nginx'
+                static_configs:
+                  - targets: ['nginx.default.svc.cluster.local:9113']
+
+        alertmanager:
+          enabled: true
+          config:
+            global:
+              resolve_timeout: 5m
+            route:
+              group_by: ['alertname', 'job']
+              group_wait: 30s
+              group_interval: 5m
+              repeat_interval: 12h
+              receiver: 'null'
+            receivers:
+              - name: 'null'
+
+        grafana:
+          enabled: true
+          defaultDashboardsEnabled: true
+          adminPassword: admin
+          service:
+            type: LoadBalancer
+
+        prometheusOperator:
+          enabled: true
+          admissionWebhooks:
+            enabled: true
+            patch:
+              enabled: true
+
+        kubeStateMetrics:
+          enabled: true
+
+        nodeExporter:
+          enabled: true
+
+        additionalPrometheusRulesMap:
+          nginx-rules:
+            groups:
+            - name: nginx.rules
+              rules:
+              - alert: NginxHighCPU
+                expr: rate(process_cpu_seconds_total{job="nginx"}[5m]) * 100 > 80
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Nginx high CPU usage"
+                  description: "Nginx CPU usage is above 80% for more than 5 minutes\n Current value: {{ $value }}%"
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
