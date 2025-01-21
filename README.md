@@ -83,6 +83,11 @@ The deployment will create:
 └── README.md
 ```
 
+## Public Access URLs
+
+- ArgoCD UI: http://57.152.14.57
+- Nginx Application: http://135.237.2.156
+
 ## Quick Start
 
 1. Clone this repository:
