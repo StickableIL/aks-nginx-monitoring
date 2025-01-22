@@ -97,29 +97,38 @@ The deployment will create:
    cd aks-nginx-monitoring
    ```
 
-2. Initialize Terraform:
+2. Login to Azure:
+   ```bash
+   az login
+   # Verify your subscription
+   az account show
+   # If needed, set specific subscription
+   # az account set --subscription <subscription-id>
+   ```
+
+3. Initialize Terraform:
    ```bash
    cd terraform
    terraform init
    ```
 
-3. Deploy the infrastructure:
+4. Deploy the infrastructure:
    ```bash
    terraform apply
    ```
 
-4. Configure kubectl:
+5. Configure kubectl:
    ```bash
    az aks get-credentials --resource-group <resource-group> --name <cluster-name>
    ```
 
-5. Install ArgoCD:
+6. Install ArgoCD:
    ```bash
    kubectl create namespace argocd
    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
    ```
 
-6. Access ArgoCD UI:
+7. Access ArgoCD UI:
    ```bash
    kubectl port-forward svc/argocd-server -n argocd 8080:443
    ```
@@ -128,7 +137,7 @@ The deployment will create:
    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
    ```
 
-7. Deploy the application using ArgoCD:
+8. Deploy the application using ArgoCD:
    ```bash
    kubectl apply -f kubernetes/argocd/application.yaml
    ```
