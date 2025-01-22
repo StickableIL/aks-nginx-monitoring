@@ -14,6 +14,7 @@ crash.log
 *.swp
 *.swo
 task.txt
+tradeoffs.txt
 
 # OS generated files
 .DS_Store

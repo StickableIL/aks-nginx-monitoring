@@ -135,6 +135,31 @@ The deployment will create:
 
 ## Monitoring
 
+### Monitoring Architecture
+
+The monitoring stack consists of both internal (ClusterIP) and external (LoadBalancer) services:
+
+1. Internal Services:
+   - `prometheus-operated`: Internal service created by Prometheus Operator that performs the actual metrics collection and alert evaluation
+   - `alertmanager-operated`: Internal service that handles alert routing and management
+
+2. External Services:
+   - `prometheus-external`: LoadBalancer service (172.212.69.91:9090) that provides external access to the Prometheus UI
+   - `alertmanager-external`: LoadBalancer service (20.242.176.155:9093) that provides external access to the Alertmanager UI
+
+The monitoring flow works as follows:
+1. The ServiceMonitor (kubernetes/nginx/servicemonitor.yaml) defines what to monitor:
+   - Targets nginx pods with label 'app: nginx' in the default namespace
+   - Scrapes metrics every 15 seconds from the metrics port
+2. The internal prometheus-operated service:
+   - Discovers the ServiceMonitor
+   - Scrapes metrics from nginx based on the ServiceMonitor configuration
+   - Evaluates alert rules (like NginxHighCPU)
+3. The external services (prometheus-external and alertmanager-external):
+   - Do not participate in the actual monitoring
+   - Only provide external UI access to view the collected metrics, alerts, and manage the monitoring stack
+   - Use selectors to route external traffic to the same pods that the internal services use
+
 ### Accessing Monitoring Services
 
 Prometheus and Alertmanager are exposed via external IPs:
