@@ -84,10 +84,37 @@ The deployment will create:
 └── README.md
 ```
 
-## Public Access URLs
+## Configuring Access
 
-- ArgoCD UI: http://57.152.14.57
-- Nginx Application: http://135.237.2.156
+By default, all services are deployed with ClusterIP type for internal access. To expose services externally, you have several options:
+
+1. Azure Application Gateway Ingress Controller (AGIC):
+   - Recommended for production environments
+   - Provides WAF capabilities and SSL termination
+   - Configure in the terraform/modules/aks/main.tf file
+
+2. Nginx Ingress Controller:
+   ```bash
+   # Install Nginx Ingress Controller
+   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+   helm repo update
+   helm install nginx-ingress ingress-nginx/ingress-nginx
+   ```
+
+3. Port Forwarding (for development/testing):
+   ```bash
+   # For ArgoCD UI
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+   # For Prometheus
+   kubectl port-forward svc/prometheus-operated -n monitoring 9090:9090
+
+   # For Alertmanager
+   kubectl port-forward svc/alertmanager-operated -n monitoring 9093:9093
+
+   # For Nginx application
+   kubectl port-forward svc/nginx 8000:80
+   ```
 
 ## Quick Start
 
@@ -128,7 +155,7 @@ The deployment will create:
    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
    ```
 
-7. Access ArgoCD UI:
+7. Access ArgoCD UI using port-forward:
    ```bash
    kubectl port-forward svc/argocd-server -n argocd 8080:443
    ```
@@ -146,42 +173,39 @@ The deployment will create:
 
 ### Monitoring Architecture
 
-The monitoring stack consists of both internal (ClusterIP) and external (LoadBalancer) services:
+The monitoring stack consists of internal (ClusterIP) services:
 
 1. Internal Services:
    - `prometheus-operated`: Internal service created by Prometheus Operator that performs the actual metrics collection and alert evaluation
    - `alertmanager-operated`: Internal service that handles alert routing and management
 
-2. External Services:
-   - `prometheus-external`: LoadBalancer service (172.212.69.91:9090) that provides external access to the Prometheus UI
-   - `alertmanager-external`: LoadBalancer service (20.242.176.155:9093) that provides external access to the Alertmanager UI
-
 The monitoring flow works as follows:
 1. The ServiceMonitor (kubernetes/nginx/servicemonitor.yaml) defines what to monitor:
    - Targets nginx pods with label 'app: nginx' in the default namespace
    - Scrapes metrics every 15 seconds from the metrics port
-2. The internal prometheus-operated service:
+2. The prometheus-operated service:
    - Discovers the ServiceMonitor
    - Scrapes metrics from nginx based on the ServiceMonitor configuration
    - Evaluates alert rules (like NginxHighCPU)
-3. The external services (prometheus-external and alertmanager-external):
-   - Do not participate in the actual monitoring
-   - Only provide external UI access to view the collected metrics, alerts, and manage the monitoring stack
-   - Use selectors to route external traffic to the same pods that the internal services use
 
 ### Accessing Monitoring Services
 
-Prometheus and Alertmanager are exposed via external IPs:
+Use port-forwarding to access the monitoring services:
 
-- Prometheus: http://172.212.69.91:9090
-- Alertmanager: http://20.242.176.155:9093
+```bash
+# Access Prometheus UI
+kubectl port-forward svc/prometheus-operated -n monitoring 9090:9090
+
+# Access Alertmanager UI
+kubectl port-forward svc/alertmanager-operated -n monitoring 9093:9093
+```
 
 ### Using Prometheus UI
 
-1. Key Pages to Check:
-   - Targets: http://172.212.69.91:9090/targets (shows if nginx metrics scraping is working)
-   - Alerts: http://172.212.69.91:9090/alerts (shows configured alert rules)
-   - Rules: http://172.212.69.91:9090/rules (shows all prometheus rules)
+1. Key Pages to Check (after port-forwarding):
+   - Targets: http://localhost:9090/targets (shows if nginx metrics scraping is working)
+   - Alerts: http://localhost:9090/alerts (shows configured alert rules)
+   - Rules: http://localhost:9090/rules (shows all prometheus rules)
 
 2. Useful Prometheus Queries:
    ```
@@ -215,7 +239,7 @@ The following alerts are configured:
 
 ### Using Alertmanager UI
 
-Access Alertmanager at http://20.242.176.155:9093 to:
+Access Alertmanager using port-forward to:
 - View active alerts
 - Check silenced/inhibited alerts
 - Review alert history
@@ -251,3 +275,4 @@ The estimated time to complete this setup is approximately 2 hours:
 - Default node pool uses Standard_B2s VM size
 - Monitoring is configured with basic CPU usage alerts
 - ArgoCD is used for GitOps-based deployment
+- All services are internal by default - configure ingress or use port-forwarding based on your requirements
